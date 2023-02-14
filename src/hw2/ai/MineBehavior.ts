@@ -56,8 +56,13 @@ export default class MineBehavior implements AI {
                 this.handleMineExploded(event);
                 break;
             }
+            case HW2Events.PLAYER_MINE_COLLISION: {
+                this.owner.animation.play('EXPLODING');
+                this.handleMineExploded(event);
+            }
             default: {
-                throw new Error("Unhandled event in MineBehavior! Event type: " + event.type);
+                this.owner.animation.play('IDLE');
+                //throw new Error("Unhandled event in MineBehavior! Event type: " + event.type);
             }
         }
     }

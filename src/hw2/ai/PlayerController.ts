@@ -10,6 +10,7 @@ import MathUtils from "../../Wolfie2D/Utils/MathUtils";
 
 import { HW2Events } from "../HW2Events";
 import { HW2Controls } from "../HW2Controls";
+import Map from "../../Wolfie2D/DataTypes/Collections/Map";
 
 export const PlayerAnimations = {
     IDLE: "IDLE",
@@ -39,8 +40,12 @@ export default class PlayerController implements AI {
     private maxCharge: number;
     private minCharge: number;
 
+	private invincible: boolean;
+
 	/** A timer for charging the player's laser cannon thing */
 	private laserTimer: Timer;
+
+	private invincibleTimer: Timer;
 
 	// A receiver and emitter to hook into the event queue
 	private receiver: Receiver;
@@ -59,6 +64,8 @@ export default class PlayerController implements AI {
 		this.emitter = new Emitter();
 
 		this.laserTimer = new Timer(2500, this.handleLaserTimerEnd, false);
+
+		this.invincibleTimer = new Timer(1500,this.handleInvincibleEnd, false);
 		
 		this.receiver.subscribe(HW2Events.SHOOT_LASER);
 
@@ -88,6 +95,9 @@ export default class PlayerController implements AI {
 
         // Play the idle animation by default
 		this.owner.animation.play(PlayerAnimations.IDLE);
+
+		//Invincibility
+		this.invincible = false;
 	};
 	/**
 	 * Handles updates to the player 
@@ -137,9 +147,13 @@ export default class PlayerController implements AI {
 
 		// Player looses a little bit of air each frame
 		this.currentAir = MathUtils.clamp(this.currentAir - deltaT, this.minAir, this.maxAir);
+		var pkt = new Map<number>(); pkt.add("Current", this.currentAir); pkt.add("Max", this.maxAir);
+		this.emitter.fireEvent("AirChange", pkt);
 
 		// If the player is out of air - start subtracting from the player's health
 		this.currentHealth = this.currentAir <= this.minAir ? MathUtils.clamp(this.currentHealth - deltaT*2, this.minHealth, this.maxHealth) : this.currentHealth;
+		var pkt = new Map<number>(); pkt.add("Current", this.currentHealth); pkt.add("Max",this.maxHealth);
+		this.emitter.fireEvent("HealthChange",pkt);
 	}
 	/**
 	 * This method handles all events that the reciever for the PlayerController is
@@ -155,8 +169,23 @@ export default class PlayerController implements AI {
 				this.handleShootLaserEvent(event);
 				break;
 			}
+			case HW2Events.PLAYER_MINE_COLLISION: {
+				if (!this.invincible) {
+					this.owner.animation.playIfNotAlready('HIT');
+					this.currentHealth -= 1; 
+					var pkt = new Map<number>(); pkt.add("Current", this.currentHealth); pkt.add("Max",this.maxHealth);
+					this.emitter.fireEvent("HealthChange",pkt);
+					if (this.currentHealth <= 0) this.emitter.fireEvent(HW2Events.DEAD);
+					this.handleInvincibility();
+				}
+				break;
+			}
+			case HW2Events.DEAD: {
+				this.owner.animation.play('DEATH');
+			}
 			default: {
-				throw new Error(`Unhandled event of type: ${event.type} caught in PlayerController`);
+				this.owner.animation.playIfNotAlready('IDLE');
+				//throw new Error(`Unhandled event of type: ${event.type} caught in PlayerController`);
 			}
 		}
 	}
@@ -174,6 +203,16 @@ export default class PlayerController implements AI {
 	protected handleShootLaserEvent(event: GameEvent): void {
 		this.laserTimer.reset();
 		this.laserTimer.start();
+	}
+
+	protected handleInvincibility(): void {
+		this.invincibleTimer.reset();
+		this.invincible = true;
+		this.invincibleTimer.start();
+	}
+
+	protected handleInvincibleEnd = () => {
+		this.invincible = false;
 	}
 
 	/** 

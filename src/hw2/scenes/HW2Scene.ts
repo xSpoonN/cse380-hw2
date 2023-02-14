@@ -166,6 +166,8 @@ export default class HW2Scene extends Scene {
 		this.receiver.subscribe(HW2Events.CHARGE_CHANGE);
 		this.receiver.subscribe(HW2Events.SHOOT_LASER);
 		this.receiver.subscribe(HW2Events.DEAD);
+		this.receiver.subscribe("HealthChange");
+		this.receiver.subscribe("AirChange");
 
 		// Subscribe to laser events
 		this.receiver.subscribe(HW2Events.FIRING_LASER);
@@ -233,6 +235,12 @@ export default class HW2Scene extends Scene {
 			case HW2Events.FIRING_LASER: {
 				this.minesDestroyed += this.handleMineLaserCollisions(event.data.get("laser"), this.mines);
 				break;
+			}
+			case "HealthChange": {
+				this.handleHealthChange(event.data.get("Current"), event.data.get("Max"));
+			}
+			case "AirChange": {
+				this.handleAirChange(event.data.get("Current"), event.data.get("Max"));
 			}
 			default: {
 				throw new Error(`Unhandled event with type ${event.type} caught in ${this.constructor.name}`);
