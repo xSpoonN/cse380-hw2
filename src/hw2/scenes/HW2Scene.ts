@@ -744,7 +744,14 @@ export default class HW2Scene extends Scene {
 	 */
 	public handleBubblePlayerCollisions(): number {
 		// TODO check for collisions between the player and the bubbles
-        return;
+		let collisions = 0;
+		for (let bubb of this.bubbles) {
+			if (bubb.visible && HW2Scene.checkAABBtoCircleCollision(this.player.boundary,bubb.collisionShape.getBoundingCircle())) {
+				this.emitter.fireEvent("PlayerBubbleCollision", {id: bubb.id}); 
+				collisions++;
+			}
+		}
+        return collisions;
 	}
 
 	/**
@@ -818,7 +825,15 @@ export default class HW2Scene extends Scene {
 	 */
 	public static checkAABBtoCircleCollision(aabb: AABB, circle: Circle): boolean {
         // TODO implement collision detection for AABBs and Circles
-        return;
+		if (aabb.containsPoint(circle.center)) return true;
+		/* Gets the x value of a point on the AABB closest to the center of the circle. 
+		 * If the circle's center is to the left of the box, it will pick the x value of the rectangle's left
+		 * If the circle's center is aligned with the box, it will pick the x value of the circle's center
+		 * If the circle's center is to the right of the box, it will pick the x value of the rectangle's right 
+		 * Same logic is applied to y value. */
+		var closestX = Math.max(aabb.left, Math.min(circle.center.x,aabb.right));
+		var closestY = Math.max(aabb.top, Math.min(circle.center.y,aabb.bottom));
+		return (circle.containsPoint(new Vec2(closestX, closestY)));
 	}
 
     /** Methods for locking and wrapping nodes */
