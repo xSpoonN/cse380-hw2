@@ -225,6 +225,7 @@ export default class HW2Scene extends Scene {
 				break;
 			}
 			case HW2Events.DEAD: {
+				console.log("Game Deadge");
 				this.gameOverTimer.start();
 				break;
 			}
@@ -237,10 +238,15 @@ export default class HW2Scene extends Scene {
 				break;
 			}
 			case "HealthChange": {
-				this.handleHealthChange(event.data.get("Current"), event.data.get("Max"));
+				this.handleHealthChange(event.data.get("Current"), event.data.get("Max")); 
+				if (event.data.get("Current") <= 0) {
+					console.log("Deadge");
+					this.emitter.fireEvent(HW2Events.DEAD);
+				}
+				break;
 			}
 			case "AirChange": {
-				this.handleAirChange(event.data.get("Current"), event.data.get("Max"));
+				this.handleAirChange(event.data.get("Current"), event.data.get("Max")); break;
 			}
 			default: {
 				throw new Error(`Unhandled event with type ${event.type} caught in ${this.constructor.name}`);
@@ -546,6 +552,21 @@ export default class HW2Scene extends Scene {
 	 */
 	protected spawnBubble(): void {
 		// TODO spawn bubbles!
+		let bubb: Graphic = this.bubbles.find((bubb: Graphic) => { return !bubb.visible });
+
+		if (bubb){
+			bubb.visible = true;
+
+			let paddedViewportSize = this.viewport.getHalfSize().scaled(2).add(this.worldPadding);
+			let viewportSize = this.viewport.getHalfSize().scaled(2);
+
+			//console.log(`${paddedViewportSize.x}, ${paddedViewportSize.y} | ${viewportSize.x}, ${viewportSize.y} || ${paddedViewportSize.x - viewportSize.x}`);
+
+			bubb.position.copy(RandUtils.randVec(paddedViewportSize.x - viewportSize.x, viewportSize.x, viewportSize.y, paddedViewportSize.y));
+
+			bubb.setAIActive(true, {});
+			this.bubbleSpawnTimer.start(100);
+		}
 	}
 	/**
 	 * This function takes in a GameNode that may be out of bounds of the viewport and
@@ -554,8 +575,6 @@ export default class HW2Scene extends Scene {
 	 * in use.
 	 * 
 	 * @param node The node to wrap around the screen
-	 * @param viewportCenter The center of the viewport
-	 * @param paddedViewportSize The size of the viewport with padding
 	 * 
 	 * @remarks
 	 * 
@@ -592,6 +611,12 @@ export default class HW2Scene extends Scene {
 	 */
 	public handleScreenDespawn(node: CanvasNode): void {
         // TODO - despawn the game nodes when they move out of the padded viewport
+		//console.log(`Attempting to despawn node: (${node.position.x}, ${node.position.y})` );
+		let paddedViewport = this.viewport.getHalfSize().scaled(2).add(this.worldPadding);
+		if (node.position.x <= 0 || node.position.x > paddedViewport.x || node.position.y <= 0 || node.position.y > paddedViewport.y) {
+			console.log(`Despawning node: (${node.position.x}, ${node.position.y})` );
+			node.visible = false;
+		}
 	}
 
 	/** Methods for updating the UI */
@@ -747,7 +772,8 @@ export default class HW2Scene extends Scene {
 		let collisions = 0;
 		for (let bubb of this.bubbles) {
 			if (bubb.visible && HW2Scene.checkAABBtoCircleCollision(this.player.boundary,bubb.collisionShape.getBoundingCircle())) {
-				this.emitter.fireEvent("PlayerBubbleCollision", {id: bubb.id}); 
+				this.emitter.fireEvent("PlayerBubbleCollision"); 
+				bubb.visible = false;
 				collisions++;
 			}
 		}
@@ -775,6 +801,7 @@ export default class HW2Scene extends Scene {
 		let collisions = 0;
 		for (let mine of this.mines) {
 			if (mine.visible && this.player.collisionShape.overlaps(mine.collisionShape)) {
+				console.log("Hit!");
 				this.emitter.fireEvent(HW2Events.PLAYER_MINE_COLLISION, {id: mine.id});
 				collisions += 1;
 			}

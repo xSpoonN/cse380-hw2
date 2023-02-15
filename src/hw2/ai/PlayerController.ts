@@ -65,9 +65,9 @@ export default class PlayerController implements AI {
 
 		this.laserTimer = new Timer(2500, this.handleLaserTimerEnd, false);
 
-		this.invincibleTimer = new Timer(1500,this.handleInvincibleEnd, false);
+		//this.invincibleTimer = new Timer(1500,this.handleInvincibleEnd, false);
 		
-		this.receiver.subscribe(HW2Events.SHOOT_LASER);
+		this.receiver.subscribe([HW2Events.SHOOT_LASER, HW2Events.DEAD, HW2Events.PLAYER_MINE_COLLISION, "PlayerBubbleCollision"]);
 
 		this.activate(options);
 	}
@@ -154,6 +154,11 @@ export default class PlayerController implements AI {
 		this.currentHealth = this.currentAir <= this.minAir ? MathUtils.clamp(this.currentHealth - deltaT*2, this.minHealth, this.maxHealth) : this.currentHealth;
 		var pkt = new Map<number>(); pkt.add("Current", this.currentHealth); pkt.add("Max",this.maxHealth);
 		this.emitter.fireEvent("HealthChange",pkt);
+		if (this.currentHealth <= 0) {
+			console.log("Deadge");
+			this.emitter.fireEvent(HW2Events.DEAD);
+			this.owner.animation.play('DEATH');
+		}
 	}
 	/**
 	 * This method handles all events that the reciever for the PlayerController is
@@ -170,22 +175,39 @@ export default class PlayerController implements AI {
 				break;
 			}
 			case HW2Events.PLAYER_MINE_COLLISION: {
+				//console.log("I've been hit!");
 				if (!this.invincible) {
 					this.owner.animation.playIfNotAlready('HIT');
+					setTimeout(() => this.owner.animation.play('IDLE'), 100);
 					this.currentHealth -= 1; 
 					var pkt = new Map<number>(); pkt.add("Current", this.currentHealth); pkt.add("Max",this.maxHealth);
 					this.emitter.fireEvent("HealthChange",pkt);
-					if (this.currentHealth <= 0) this.emitter.fireEvent(HW2Events.DEAD);
+					if (this.currentHealth <= 0) {
+						this.emitter.fireEvent(HW2Events.DEAD);
+						console.log("Deadege");
+						this.owner.animation.play('DEATH'); break;
+					}
 					this.handleInvincibility();
 				}
+				//console.log("Sike i'm invincible for now");
 				break;
 			}
 			case HW2Events.DEAD: {
-				this.owner.animation.play('DEATH');
+				console.log("Deadege");
+				this.owner.animation.play('DEATH'); break;
+			}
+			case "PlayerBubbleCollision": {
+				//console.log("Hit a bubble");
+				var oldAir = this.currentAir;
+				this.currentAir = Math.min(this.maxAir,++this.currentAir);
+				if (oldAir != this.currentAir) {
+					var pkt = new Map<number>(); pkt.add("Current", this.currentAir); pkt.add("Max", this.maxAir);
+					this.emitter.fireEvent("AirChange", pkt);
+				}
+				break;
 			}
 			default: {
-				this.owner.animation.playIfNotAlready('IDLE');
-				//throw new Error(`Unhandled event of type: ${event.type} caught in PlayerController`);
+				throw new Error(`Unhandled event of type: ${event.type} caught in PlayerController`);
 			}
 		}
 	}
@@ -206,13 +228,8 @@ export default class PlayerController implements AI {
 	}
 
 	protected handleInvincibility(): void {
-		this.invincibleTimer.reset();
 		this.invincible = true;
-		this.invincibleTimer.start();
-	}
-
-	protected handleInvincibleEnd = () => {
-		this.invincible = false;
+		setTimeout(() => this.invincible = false, 1500);
 	}
 
 	/** 
