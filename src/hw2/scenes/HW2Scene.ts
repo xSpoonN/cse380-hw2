@@ -189,6 +189,9 @@ export default class HW2Scene extends Scene {
 		this.handleMinePlayerCollisions();
 		this.bubblesPopped += this.handleBubblePlayerCollisions();
 
+		this.wrapPlayer(this.player,this.viewport.getCenter(),this.viewport.getHalfSize());
+		this.lockPlayer(this.player,this.viewport.getCenter(),this.viewport.getHalfSize());
+
 		// Handle timers
 		this.handleTimers();
 
@@ -225,8 +228,15 @@ export default class HW2Scene extends Scene {
 				break;
 			}
 			case HW2Events.DEAD: {
-				console.log("Game Deadge");
-				this.gameOverTimer.start();
+				//console.log("Game Deadge");
+				//this.gameOverTimer.start(); //This timer doesn't seem to work?
+				setTimeout(() => {
+					this.sceneManager.changeToScene(GameOver, {
+						bubblesPopped: this.bubblesPopped, 
+						minesDestroyed: this.minesDestroyed,
+						timePassed: this.timePassed
+					}, {});
+				}, 3000);
 				break;
 			}
 			case HW2Events.CHARGE_CHANGE: {
@@ -240,7 +250,7 @@ export default class HW2Scene extends Scene {
 			case "HealthChange": {
 				this.handleHealthChange(event.data.get("Current"), event.data.get("Max")); 
 				if (event.data.get("Current") <= 0) {
-					console.log("Deadge");
+					//console.log("Deadge");
 					this.emitter.fireEvent(HW2Events.DEAD);
 				}
 				break;
@@ -553,17 +563,12 @@ export default class HW2Scene extends Scene {
 	protected spawnBubble(): void {
 		// TODO spawn bubbles!
 		let bubb: Graphic = this.bubbles.find((bubb: Graphic) => { return !bubb.visible });
-
 		if (bubb){
 			bubb.visible = true;
-
 			let paddedViewportSize = this.viewport.getHalfSize().scaled(2).add(this.worldPadding);
 			let viewportSize = this.viewport.getHalfSize().scaled(2);
-
 			//console.log(`${paddedViewportSize.x}, ${paddedViewportSize.y} | ${viewportSize.x}, ${viewportSize.y} || ${paddedViewportSize.x - viewportSize.x}`);
-
 			bubb.position.copy(RandUtils.randVec(paddedViewportSize.x - viewportSize.x, viewportSize.x, viewportSize.y, paddedViewportSize.y));
-
 			bubb.setAIActive(true, {});
 			this.bubbleSpawnTimer.start(100);
 		}
@@ -613,7 +618,8 @@ export default class HW2Scene extends Scene {
         // TODO - despawn the game nodes when they move out of the padded viewport
 		//console.log(`Attempting to despawn node: (${node.position.x}, ${node.position.y})` );
 		let paddedViewport = this.viewport.getHalfSize().scaled(2).add(this.worldPadding);
-		if (node.position.x <= 0 || node.position.x > paddedViewport.x || node.position.y <= 0 || node.position.y > paddedViewport.y) {
+		if (node.position.x <= -this.worldPadding.x || node.position.x > paddedViewport.x || 
+			node.position.y <= -this.worldPadding.y || node.position.y > paddedViewport.y) {
 			console.log(`Despawning node: (${node.position.x}, ${node.position.y})` );
 			node.visible = false;
 		}
@@ -911,6 +917,12 @@ export default class HW2Scene extends Scene {
 	 */
 	protected wrapPlayer(player: CanvasNode, viewportCenter: Vec2, viewportHalfSize: Vec2): void {
 		// TODO wrap the player around the top/bottom of the screen
+		let viewportSize = viewportHalfSize.scaled(2);
+		if (player.position.y < 0) {
+			player.position.y = viewportSize.y;
+		} else if (player.position.y > viewportSize.y) {
+			player.position.y = 0;
+		}
 	}
 
     /**
@@ -954,6 +966,13 @@ export default class HW2Scene extends Scene {
 	 */
 	protected lockPlayer(player: CanvasNode, viewportCenter: Vec2, viewportHalfSize: Vec2): void {
 		// TODO prevent the player from moving off the left/right side of the screen
+		let viewportSize = viewportHalfSize.scaled(2);
+		if (player.boundary.left < 0) {
+			player.position.x -= player.boundary.left;
+		}
+		if (player.boundary.right > viewportSize.x) {
+			player.position.x -= player.boundary.right - viewportSize.x;
+		}
 	}
 
 	public handleTimers(): void {
@@ -967,6 +986,7 @@ export default class HW2Scene extends Scene {
 		}
 		// If the game-over timer has run, change to the game-over scene
 		if (this.gameOverTimer.hasRun() && this.gameOverTimer.isStopped()) {
+			console.log("Game over!");
 		 	this.sceneManager.changeToScene(GameOver, {
 				bubblesPopped: this.bubblesPopped, 
 				minesDestroyed: this.minesDestroyed,

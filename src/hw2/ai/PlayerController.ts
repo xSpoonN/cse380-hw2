@@ -155,7 +155,7 @@ export default class PlayerController implements AI {
 		var pkt = new Map<number>(); pkt.add("Current", this.currentHealth); pkt.add("Max",this.maxHealth);
 		this.emitter.fireEvent("HealthChange",pkt);
 		if (this.currentHealth <= 0) {
-			console.log("Deadge");
+			//console.log("Deadge");
 			this.emitter.fireEvent(HW2Events.DEAD);
 			this.owner.animation.play('DEATH');
 		}
@@ -184,7 +184,7 @@ export default class PlayerController implements AI {
 					this.emitter.fireEvent("HealthChange",pkt);
 					if (this.currentHealth <= 0) {
 						this.emitter.fireEvent(HW2Events.DEAD);
-						console.log("Deadege");
+						//console.log("Deadege");
 						this.owner.animation.play('DEATH'); break;
 					}
 					this.handleInvincibility();
@@ -193,7 +193,7 @@ export default class PlayerController implements AI {
 				break;
 			}
 			case HW2Events.DEAD: {
-				console.log("Deadege");
+				//console.log("Deadege");
 				this.owner.animation.play('DEATH'); break;
 			}
 			case "PlayerBubbleCollision": {
@@ -229,7 +229,7 @@ export default class PlayerController implements AI {
 
 	protected handleInvincibility(): void {
 		this.invincible = true;
-		setTimeout(() => this.invincible = false, 1500);
+		setTimeout(() => this.invincible = false, 1000);
 	}
 
 	/** 

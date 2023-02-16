@@ -9,6 +9,7 @@ import GameEvent from "../../Wolfie2D/Events/GameEvent";
 
 import RandUtils from "../../Wolfie2D/Utils/RandUtils";
 import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
+import BasicRecording from "../../Wolfie2D/Playback/BasicRecording";
 
 // Layers in the main menu
 const MainMenuLayer = {
@@ -102,7 +103,7 @@ export default class MainMenu extends Scene {
         const aboutHeader = <Label>this.add.uiElement(UIElementType.LABEL, MainMenuLayer.ABOUT, {position: new Vec2(center.x, center.y - 250), text: "About"});
         aboutHeader.textColor = Color.WHITE;
 
-        const text1 = "This game was made by <YOUR NAME HERE>, Peter Walsh and Richard McKenna";
+        const text1 = "This game was made by Kevin Tao, Peter Walsh and Richard McKenna";
         const text2 = "using the Wolfie2D game engine, a TypeScript game engine created by";
         const text3 = "Joe Weaver and Richard McKenna.";
 
@@ -139,6 +140,8 @@ export default class MainMenu extends Scene {
         switch(event.type) {
             case MainMenuEvent.PLAY_GAME: {
                 this.sceneManager.changeToScene(Homework1_Scene, {seed: RandUtils.randomSeed(), recording: true});
+                //var record = new BasicRecording(Homework1_Scene, {seed: RandUtils.randomSeed(), recording: true});
+                //this.emitter.fireEvent(GameEventType.START_RECORDING, record);
                 break;
             }
             case MainMenuEvent.CONTROLS: {
