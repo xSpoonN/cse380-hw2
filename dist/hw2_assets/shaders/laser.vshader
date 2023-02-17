@@ -6,6 +6,5 @@ varying vec4 v_Position;
 
 void main(){
 	gl_Position = u_Transform * a_Position;
-
 	v_Position = a_Position;
 }

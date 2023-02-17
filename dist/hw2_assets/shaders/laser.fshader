@@ -1,6 +1,7 @@
 precision mediump float;
 
 varying vec4 v_Position;
+uniform vec4 vColor;
 
 /**
  * Macros that define constants used in the fragment shader program. 
@@ -41,9 +42,11 @@ float sinwave_laser(vec4 position);
  */
 float linear_laser(vec4 position);
 
+
 // TODO Need to somehow pass in the color from the laser shader type
 void main(){
-    gl_FragColor = vec4(255, 0, 0, 1.0);
+    /* gl_FragColor = vec4(255, 0, 0, 1.0); */
+    gl_FragColor = vColor;
 	gl_FragColor.a = linear_laser(v_Position);
 }
 

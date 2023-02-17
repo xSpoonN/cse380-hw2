@@ -22,6 +22,7 @@ export default class LaserShaderType extends RectShaderType {
 		// Get our program and buffer object
 		const program = this.resourceManager.getShaderProgram(this.programKey);
 		const buffer = this.resourceManager.getBuffer(this.bufferObjectKey);
+		const color = options.color;
 
 		// Let WebGL know we're using our shader program
 		gl.useProgram(program);
@@ -62,6 +63,12 @@ export default class LaserShaderType extends RectShaderType {
 		// Pass the translation matrix to our shader
 		const u_Transform = gl.getUniformLocation(program, "u_Transform");
 		gl.uniformMatrix4fv(u_Transform, false, transformation.toArray());
+
+		const vColor = gl.getUniformLocation(program, "vColor");
+		const colorIn = [color.r/256,color.g/256,color.b/256,color.a];
+		/* const colorIn = [Math.random(), Math.random(), Math.random(), 1.0]; */
+		gl.uniform4fv(vColor, colorIn);
+
 
 		// Draw the quad
 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);

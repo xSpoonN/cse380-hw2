@@ -126,6 +126,8 @@ export default class WebGLRenderer extends RenderingManager {
 		} else if(graphic instanceof Rect) {
 			let shader = RegistryManager.shaders.get(ShaderRegistry.RECT_SHADER);
 			let options = this.addOptions(shader.getOptions(graphic), graphic);
+			options["color"] = graphic.color;
+			console.log("HERE!!");
 			shader.render(this.gl, options);
 		} 
 	}
@@ -160,6 +162,8 @@ export default class WebGLRenderer extends RenderingManager {
 	protected renderCustom(node: CanvasNode): void {
 		let shader = RegistryManager.shaders.get(node.customShaderKey);
 		let options = this.addOptions(shader.getOptions(node), node);
+		options.color = (node as Graphic).color;
+		//console.log((node as Graphic).color);
 		shader.render(this.gl, options);
 	}
 

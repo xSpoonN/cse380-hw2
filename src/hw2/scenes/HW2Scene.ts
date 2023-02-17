@@ -620,7 +620,7 @@ export default class HW2Scene extends Scene {
 		let paddedViewport = this.viewport.getHalfSize().scaled(2).add(this.worldPadding);
 		if (node.position.x <= -this.worldPadding.x || node.position.x > paddedViewport.x || 
 			node.position.y <= -this.worldPadding.y || node.position.y > paddedViewport.y) {
-			console.log(`Despawning node: (${node.position.x}, ${node.position.y})` );
+			//console.log(`Despawning node: (${node.position.x}, ${node.position.y})` );
 			node.visible = false;
 		}
 	}
@@ -807,7 +807,7 @@ export default class HW2Scene extends Scene {
 		let collisions = 0;
 		for (let mine of this.mines) {
 			if (mine.visible && this.player.collisionShape.overlaps(mine.collisionShape)) {
-				console.log("Hit!");
+				//console.log("Hit!");
 				this.emitter.fireEvent(HW2Events.PLAYER_MINE_COLLISION, {id: mine.id});
 				collisions += 1;
 			}
