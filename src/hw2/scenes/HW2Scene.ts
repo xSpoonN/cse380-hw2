@@ -865,7 +865,7 @@ export default class HW2Scene extends Scene {
 		 * If the circle's center is to the right of the box, it will pick the x value of the rectangle's right 
 		 * Same logic is applied to y value. */
 		var closestX = Math.max(aabb.left, Math.min(circle.center.x,aabb.right));
-		var closestY = Math.max(aabb.top, Math.min(circle.center.y,aabb.bottom));
+		var closestY = Math.min(aabb.top, Math.max(circle.center.y,aabb.bottom));
 		return (circle.containsPoint(new Vec2(closestX, closestY)));
 	}
 
