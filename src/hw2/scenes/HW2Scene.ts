@@ -150,7 +150,7 @@ export default class HW2Scene extends Scene {
 		this.worldPadding = new Vec2(64, 64);
 
 		RandUtils.seed = this.seed;
-		
+
 		// Create a background layer
 		this.addLayer(HW2Layers.BACKGROUND, 0);
 		this.initBackground();
@@ -516,7 +516,7 @@ export default class HW2Scene extends Scene {
 	protected spawnMine(): void {
 		// Find the first visible mine
 		let mine: Sprite = this.mines.find((mine: Sprite) => { return !mine.visible });
-		console.log(RandUtils.seed);
+		//console.log(RandUtils.seed);
 		if (mine){
 			// Bring this mine to life
 			mine.visible = true;
@@ -571,6 +571,7 @@ export default class HW2Scene extends Scene {
 	protected spawnBubble(): void {
 		// TODO spawn bubbles!
 		let bubb: Graphic = this.bubbles.find((bubb: Graphic) => { return !bubb.visible });
+		//console.log(RandUtils.seed);
 		if (bubb){
 			bubb.visible = true;
 			let paddedViewportSize = this.viewport.getHalfSize().scaled(2).add(this.worldPadding);

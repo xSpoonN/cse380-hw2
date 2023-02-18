@@ -163,7 +163,8 @@ export default class MainMenu extends Scene {
             }
             case MainMenuEvent.PLAY_RECORDING: {
                 // TODO play the recording here
-                this.emitter.fireEvent(GameEventType.PLAY_RECORDING, {onEnd: this.sceneManager.changeToScene(MainMenu)});
+                let sm = this.sceneManager;
+                this.emitter.fireEvent(GameEventType.PLAY_RECORDING, {onEnd: function(){ console.log("aaaaaaaaaaaaaaaaaaaaa"); sm.changeToScene(MainMenu); }});
                 break;
             }
             default: {
