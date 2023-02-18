@@ -7,6 +7,7 @@ import LogItem from "../DataTypes/Playback/LogItem";
 import Recorder from "../DataTypes/Playback/Recorder";
 import Recording from "../DataTypes/Playback/Recording";
 import Replayer from "../DataTypes/Playback/Replayer";
+import BasicRecording from "./BasicRecording";
 
 
 export default class PlaybackManager implements Updateable {
@@ -82,6 +83,7 @@ export default class PlaybackManager implements Updateable {
      */
     protected handleStartRecordingEvent(event: GameEvent): void {
         let recording: Recording<LogItem> = event.data.get("recording");
+        console.log((recording as BasicRecording).init());
         if (recording !== undefined) {
             if (!this.replaying) {
                 if (this.lastRecording !== undefined) this.lastRecording.destroy();

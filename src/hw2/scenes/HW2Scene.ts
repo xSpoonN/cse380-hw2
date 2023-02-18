@@ -115,6 +115,9 @@ export default class HW2Scene extends Scene {
 	 */
 	public override initScene(options: Record<string, any>): void {
 		this.seed = options.seed === undefined ? RandUtils.randomSeed() : options.seed;
+		if (options.seed === undefined) console.log("No seed given, generating random one.");
+		else console.log(`Given seed: ${options.seed}`);
+		RandUtils.seed = this.seed;
         this.recording = options.recording === undefined ? false : options.recording; 
 	}
 	/**
@@ -146,6 +149,8 @@ export default class HW2Scene extends Scene {
 	public override startScene(){
 		this.worldPadding = new Vec2(64, 64);
 
+		RandUtils.seed = this.seed;
+		
 		// Create a background layer
 		this.addLayer(HW2Layers.BACKGROUND, 0);
 		this.initBackground();
@@ -229,14 +234,17 @@ export default class HW2Scene extends Scene {
 			}
 			case HW2Events.DEAD: {
 				//console.log("Game Deadge");
-				//this.gameOverTimer.start(); //This timer doesn't seem to work?
+				this.emitter.fireEvent(GameEventType.STOP_RECORDING);
+				if (this.gameOverTimer.isStopped() && !this.gameOverTimer.hasRun()) this.gameOverTimer.start();
+
+/* 				this.emitter.fireEvent(GameEventType.STOP_RECORDING);
 				setTimeout(() => {
 					this.sceneManager.changeToScene(GameOver, {
 						bubblesPopped: this.bubblesPopped, 
 						minesDestroyed: this.minesDestroyed,
 						timePassed: this.timePassed
 					}, {});
-				}, 3000);
+				}, 3000); */
 				break;
 			}
 			case HW2Events.CHARGE_CHANGE: {
@@ -508,7 +516,7 @@ export default class HW2Scene extends Scene {
 	protected spawnMine(): void {
 		// Find the first visible mine
 		let mine: Sprite = this.mines.find((mine: Sprite) => { return !mine.visible });
-
+		console.log(RandUtils.seed);
 		if (mine){
 			// Bring this mine to life
 			mine.visible = true;

@@ -76,6 +76,7 @@ export default class BasicReplayer implements Replayer<BasicRecording, BasicLogI
         
         // Change the scene to the initial
         this.emitter.fireEvent(GameEventType.CHANGE_SCENE, {scene: this.recording.scene(), init: this.recording.init()});
+        console.log(this.recording.init());
     
     }
     /**

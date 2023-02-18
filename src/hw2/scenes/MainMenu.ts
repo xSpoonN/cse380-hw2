@@ -139,9 +139,10 @@ export default class MainMenu extends Scene {
     protected handleEvent(event: GameEvent): void {
         switch(event.type) {
             case MainMenuEvent.PLAY_GAME: {
-                this.sceneManager.changeToScene(Homework1_Scene, {seed: RandUtils.randomSeed(), recording: true});
-                //var record = new BasicRecording(Homework1_Scene, {seed: RandUtils.randomSeed(), recording: true});
-                //this.emitter.fireEvent(GameEventType.START_RECORDING, record);
+                var randSeed = RandUtils.randomSeed();
+                console.log(`Generated seed: ${randSeed}`);
+                this.sceneManager.changeToScene(Homework1_Scene, {seed: randSeed, recording: true});
+                this.emitter.fireEvent(GameEventType.START_RECORDING, {recording: new BasicRecording(Homework1_Scene, {seed: randSeed})});
                 break;
             }
             case MainMenuEvent.CONTROLS: {
@@ -162,6 +163,7 @@ export default class MainMenu extends Scene {
             }
             case MainMenuEvent.PLAY_RECORDING: {
                 // TODO play the recording here
+                this.emitter.fireEvent(GameEventType.PLAY_RECORDING, {onEnd: this.sceneManager.changeToScene(MainMenu)});
                 break;
             }
             default: {

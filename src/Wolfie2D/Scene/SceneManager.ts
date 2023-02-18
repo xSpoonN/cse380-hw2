@@ -123,7 +123,7 @@ export default class SceneManager {
 	public update(deltaT: number){
 		while (this.receiver.hasNextEvent()) {
 			let ev = this.receiver.getNextEvent();
-			if (ev.type === GameEventType.CHANGE_SCENE) this.changeToScene(ev.data.get("scene"), ev.data.get("init"));
+			if (ev.type === GameEventType.CHANGE_SCENE) {this.changeToScene(ev.data.get("scene"), ev.data.get("init")); console.log(ev.data.get("init"))}
 		}
 
 		if(this.pendingScene !== null){
