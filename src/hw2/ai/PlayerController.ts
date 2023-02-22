@@ -153,11 +153,16 @@ export default class PlayerController implements AI {
 		// If the player is out of air - start subtracting from the player's health
 		this.currentHealth = this.currentAir <= this.minAir ? MathUtils.clamp(this.currentHealth - deltaT*2, this.minHealth, this.maxHealth) : this.currentHealth;
 		var pkt = new Map<number>(); pkt.add("Current", this.currentHealth); pkt.add("Max",this.maxHealth);
-		this.emitter.fireEvent("HealthChange",pkt);
+		if (this.currentAir <= this.minAir) {
+			this.emitter.fireEvent("HealthChange",pkt);
+			this.owner.animation.playIfNotAlready('HIT');
+			setTimeout(() => this.owner.animation.play('IDLE'), 100);
+		}
 		if (this.currentHealth <= 0) {
 			//console.log("Deadge");
 			this.emitter.fireEvent(HW2Events.DEAD);
-			this.owner.animation.play('DEATH');
+			//this.owner.animation.play('DEATH');
+			this.owner.animation.playIfNotAlready('DEATH');
 		}
 	}
 	/**
@@ -185,7 +190,8 @@ export default class PlayerController implements AI {
 					if (this.currentHealth <= 0) {
 						this.emitter.fireEvent(HW2Events.DEAD);
 						//console.log("Deadege");
-						this.owner.animation.play('DEATH'); break;
+						//this.owner.animation.play('DEATH');
+						this.owner.animation.playIfNotAlready('DEATH'); break;
 					}
 					this.handleInvincibility();
 				}
@@ -194,7 +200,8 @@ export default class PlayerController implements AI {
 			}
 			case HW2Events.DEAD: {
 				//console.log("Deadege");
-				this.owner.animation.play('DEATH'); break;
+				//this.owner.animation.play('DEATH');
+				this.owner.animation.playIfNotAlready('DEATH'); break;
 			}
 			case "PlayerBubbleCollision": {
 				//console.log("Hit a bubble");

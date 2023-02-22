@@ -234,7 +234,6 @@ export default class HW2Scene extends Scene {
 			}
 			case HW2Events.DEAD: {
 				//console.log("Game Deadge");
-				this.emitter.fireEvent(GameEventType.STOP_RECORDING);
 				if (this.gameOverTimer.isStopped() && !this.gameOverTimer.hasRun()) this.gameOverTimer.start();
 
 /* 				this.emitter.fireEvent(GameEventType.STOP_RECORDING);
@@ -996,11 +995,14 @@ export default class HW2Scene extends Scene {
 		// If the game-over timer has run, change to the game-over scene
 		if (this.gameOverTimer.hasRun() && this.gameOverTimer.isStopped()) {
 			console.log("Game over!");
-		 	this.sceneManager.changeToScene(GameOver, {
-				bubblesPopped: this.bubblesPopped, 
-				minesDestroyed: this.minesDestroyed,
-				timePassed: this.timePassed
-			}, {});
+			if (this.recording) {
+				this.emitter.fireEvent(GameEventType.STOP_RECORDING);
+				this.sceneManager.changeToScene(GameOver, {
+					bubblesPopped: this.bubblesPopped, 
+					minesDestroyed: this.minesDestroyed,
+					timePassed: this.timePassed
+				}, {});
+			}
 		}
 	}
 
